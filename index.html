@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Member Area - tescpns.online</title>
+
+<style>
+  :root {
+    --primary: #6d28d9;
+    --primary-dark: #5b21b6;
+    --secondary: #0f172a;
+    --bg: #f3f0ff;
+    --white: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e6e1fb;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --shadow: 0 10px 28px rgba(109, 40, 217, 0.12);
+
+    --c1: #7c3aed;  /* simulasi - ungu */
+    --c1-bg: #f2ebff;
+    --c2: #0891b2;  /* bumn - teal */
+    --c2-bg: #e6fbff;
+    --c3: #ea580c;  /* swasta - oranye */
+    --c3-bg: #fff2e8;
+    --c4: #db2777;  /* anti nganggur - pink */
+    --c4-bg: #ffe9f3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+      radial-gradient(circle at 8% 0%, #ede4ff 0%, transparent 45%),
+      radial-gradient(circle at 100% 10%, #e0f7fa 0%, transparent 40%),
+      var(--bg);
+    color: var(--text);
+  }
+
+  a { text-decoration: none; color: inherit; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  :focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ================= HEADER ================= */
+
+  .header {
+    height: 70px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .hamburger {
+    display: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--secondary);
+  }
+  .hamburger:hover { background: #eff6ff; }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #7c3aed 0%, #db2777 55%, #f97316 100%);
+    box-shadow: 0 3px 8px rgba(124, 58, 237, .35);
+  }
+
+  .logo-blink {
+    animation: logoBlink 2.2s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  @keyframes logoBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .25; }
+  }
+
+  .logo-text { color: #1e3a8a; }
+
+  .logo-accent {
+    color: #f97316;
+  }
+
+  .member-info { display: flex; align-items: center; gap: 15px; }
+
+  .icon-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+  }
+  .icon-btn:hover { background: #eff6ff; }
+
+  .badge-dot {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 2px solid var(--white);
+  }
+
+  .member { display: flex; align-items: center; gap: 10px; border-radius: 10px; padding: 4px 8px 4px 4px; }
+  .member:hover { background: #f1f5f9; }
+
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #db2777); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 18px; flex-shrink: 0;
+  }
+
+  .member-name { font-size: 14px; font-weight: 700; text-align: left; }
+  .member-status { display: block; font-size: 11px; color: var(--success); margin-top: 3px; }
+
+  /* dropdown panels */
+  .dropdown-wrap { position: relative; }
+
+  .dropdown-panel {
+    position: absolute;
+    top: 52px;
+    right: 0;
+    width: 300px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 10px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: .15s ease;
+    z-index: 300;
+  }
+  .dropdown-panel.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .dropdown-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: 8px 10px 4px;
+  }
+
+  .notif-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+  }
+  .notif-item:hover { background: #f8fafc; }
+  .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); margin-top: 6px; flex-shrink: 0; }
+  .notif-dot.read { background: var(--border); }
+  .notif-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
+  .notif-text span { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .notif-empty { padding: 22px 10px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  .menu-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .menu-item-btn:hover { background: #f8fafc; }
+  .menu-item-btn.danger { color: var(--danger); }
+  .menu-divider { height: 1px; background: var(--border); margin: 6px 2px; }
+
+  /* ================= LAYOUT ================= */
+
+  .layout { display: flex; min-height: calc(100vh - 70px); position: relative; }
+
+  .sidebar-scrim {
+    display: none;
+    position: fixed;
+    inset: 70px 0 0 0;
+    background: rgba(15,23,42,.35);
+    z-index: 150;
+  }
+
+  /* ================= SIDEBAR ================= */
+
+  .sidebar {
+    width: 250px;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    padding: 25px 15px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-title {
+    font-size: 11px; font-weight: 800; color: #94a3b8;
+    text-transform: uppercase; margin: 5px 14px 12px; letter-spacing: .5px;
+  }
+
+  .menu { list-style: none; }
+  .menu li { margin-bottom: 5px; }
+
+  .menu a {
+    display: flex; align-items: center; gap: 13px;
+    padding: 13px 14px; border-radius: 9px;
+    font-size: 14px; font-weight: 600; color: #475569;
+    transition: .15s;
+  }
+  .menu a:hover { background: #eff6ff; color: var(--primary); }
+  .menu a.active { background: linear-gradient(120deg, #7c3aed, #db2777); color: white; }
+  .menu-icon { width: 23px; text-align: center; font-size: 18px; }
+
+  /* ================= CONTENT ================= */
+
+  .content { flex: 1; padding: 35px; max-width: 1300px; margin: 0 auto; width: 100%; }
+
+  .welcome {
+    background: linear-gradient(120deg, #7c3aed 0%, #db2777 55%, #ea580c 100%);
+    color: white; border-radius: 18px; padding: 30px;
+    margin-bottom: 30px; box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome::after {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: rgba(255,255,255,.12);
+    border-radius: 50%;
+  }
+  .welcome h1 { font-size: 27px; margin-bottom: 8px; }
+  .welcome p { font-size: 15px; opacity: .9; }
+  .welcome-badge {
+    display: inline-block; margin-top: 18px;
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+    padding: 8px 13px; border-radius: 20px; font-size: 12px;
+  }
+
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
+    scroll-margin-top: 90px;
+  }
+  .section-header h2 { font-size: 21px; }
+  .section-header p { color: var(--muted); font-size: 13px; margin-top: 5px; }
+
+  .products { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+  .product-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+    padding: 25px; min-height: 245px; display: flex; flex-direction: column;
+    justify-content: space-between; box-shadow: 0 3px 12px rgba(15,23,42,.03);
+    transition: .25s; scroll-margin-top: 90px;
+  }
+  .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+
+  .product-top { display: flex; gap: 17px; }
+  .product-icon {
+    width: 60px; height: 60px; border-radius: 14px; background: #eff6ff;
+    display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;
+  }
+  .product-card.card-1 .product-icon { background: var(--c1-bg); }
+  .product-card.card-2 .product-icon { background: var(--c2-bg); }
+  .product-card.card-3 .product-icon { background: var(--c3-bg); }
+  .product-card.card-4 .product-icon { background: var(--c4-bg); }
+
+  .product-card.card-1 { border-top: 4px solid var(--c1); }
+  .product-card.card-2 { border-top: 4px solid var(--c2); }
+  .product-card.card-3 { border-top: 4px solid var(--c3); }
+  .product-card.card-4 { border-top: 4px solid var(--c4); }
+
+  .product-card.card-1 .access { color: var(--c1); }
+  .product-card.card-2 .access { color: var(--c2); }
+  .product-card.card-3 .access { color: var(--c3); }
+  .product-card.card-4 .access { color: var(--c4); }
+
+  .product-card.card-1 .btn { background: var(--c1); }
+  .product-card.card-1 .btn:hover { background: #6524c9; }
+  .product-card.card-2 .btn { background: var(--c2); }
+  .product-card.card-2 .btn:hover { background: #067188; }
+  .product-card.card-3 .btn { background: var(--c3); }
+  .product-card.card-3 .btn:hover { background: #c2410c; }
+  .product-card.card-4 .btn { background: var(--c4); }
+  .product-card.card-4 .btn:hover { background: #be185d; }
+  .product-card h3 { font-size: 18px; line-height: 1.4; margin-bottom: 8px; }
+  .product-card p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  .product-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  .access { font-size: 12px; color: var(--success); font-weight: 700; }
+
+  .btn {
+    display: inline-block; background: linear-gradient(120deg, #7c3aed, #a855f7); color: white;
+    padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; transition: .2s;
+  }
+  .btn:hover { filter: brightness(0.92); }
+
+  .footer {
+    margin-top: 35px; padding: 22px 24px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 12px; text-align: center;
+    background: var(--white); border-radius: 14px;
+  }
+  .footer-notice {
+    max-width: 640px; margin: 0 auto 14px; line-height: 1.6;
+    font-weight: 600;
+    background: linear-gradient(120deg, #7c3aed 0%, #db2777 55%, #ea580c 100%);
+    color: #ffffff;
+    padding: 16px 18px;
+    border-radius: 12px;
+  }
+  .footer-copyright { color: var(--muted); }
+
+  /* ================= TOAST ================= */
+
+  .toast-wrap {
+    position: fixed; bottom: 22px; right: 22px; z-index: 500;
+    display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+  }
+  .toast {
+    background: var(--secondary); color: white; padding: 12px 16px;
+    border-radius: 10px; font-size: 13px; box-shadow: var(--shadow);
+    opacity: 0; transform: translateY(8px); transition: .2s;
+    max-width: 280px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ================= MODAL ================= */
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 400; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white); border-radius: 18px; width: 100%; max-width: 520px;
+    max-height: 88vh; overflow-y: auto; box-shadow: var(--shadow);
+  }
+
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 22px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--white);
+  }
+  .modal-head h3 { font-size: 17px; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 50%; font-size: 16px;
+    color: var(--muted); display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #f1f5f9; }
+  .modal-body { padding: 22px; }
+
+  .progress-bar { height: 8px; background: var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 4px; }
+  .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: .3s; }
+  .progress-label { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+  .quiz-question { font-size: 15px; font-weight: 700; margin-bottom: 16px; line-height: 1.5; }
+
+  .quiz-option {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 13px 14px; border: 1.5px solid var(--border); border-radius: 11px;
+    margin-bottom: 10px; font-size: 13.5px; text-align: left; transition: .15s;
+  }
+  .quiz-option:hover { border-color: var(--primary); background: #f8faff; }
+  .quiz-option.selected { border-color: var(--primary); background: #eff6ff; font-weight: 700; }
+  .quiz-option.correct { border-color: var(--success); background: #f0fdf4; font-weight: 700; }
+  .quiz-option.wrong { border-color: var(--danger); background: #fef2f2; font-weight: 700; }
+  .quiz-option .letter {
+    width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0;
+  }
+
+  .quiz-nav { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+  .btn-secondary {
+    padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    background: #f1f5f9; color: var(--text);
+  }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-secondary:disabled { opacity: .45; cursor: not-allowed; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .result-score { text-align: center; padding: 10px 0 6px; }
+  .result-score .num { font-size: 46px; font-weight: 800; color: var(--primary); }
+  .result-score .label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .toc-list { list-style: none; }
+  .toc-list li {
+    display: flex; justify-content: space-between; padding: 12px 4px;
+    border-bottom: 1px solid var(--border); font-size: 13.5px;
+  }
+  .toc-list li span:last-child { color: var(--muted); font-size: 12px; }
+
+  /* ================= LAPTOP KECIL / TABLET LANDSCAPE (≤1024px) ================= */
+
+  @media (max-width: 1024px) {
+    .content { padding: 28px; }
+    .products { gap: 16px; }
+    .sidebar { width: 220px; }
+  }
+
+  /* ================= TABLET PORTRAIT / MOBILE (≤850px) ================= */
+
+  @media (max-width: 850px) {
+    .sidebar {
+      position: fixed; top: 70px; left: 0; bottom: 0; z-index: 160;
+      transform: translateX(-100%); transition: .2s ease; width: 250px;
+      box-shadow: var(--shadow); overflow-y: auto;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-scrim.show { display: block; }
+    .hamburger { display: flex; }
+    .content { padding: 25px 20px; }
+    .products { grid-template-columns: 1fr; }
+  }
+
+  /* ================= HP BESAR / TABLET SEMPIT (≤650px) ================= */
+
+  @media (max-width: 650px) {
+    .header { padding: 0 15px; }
+    .header-left { gap: 10px; }
+    .logo { font-size: 17px; gap: 7px; }
+    .logo-mark { width: 28px; height: 28px; }
+    .member-name, .member-status { display: none; }
+    .content { padding: 20px 15px; }
+    .welcome { padding: 22px; }
+    .welcome h1 { font-size: 21px; }
+    .welcome p { font-size: 13.5px; }
+    .section-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .product-card { min-height: unset; padding: 20px; }
+    .product-icon { width: 50px; height: 50px; font-size: 24px; border-radius: 12px; }
+    .product-card h3 { font-size: 16px; }
+    .product-bottom { flex-wrap: wrap; gap: 10px; }
+    .dropdown-panel { width: 260px; right: -10px; }
+    .modal { max-width: 100%; border-radius: 16px 16px 0 0; }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal-body { padding: 18px; }
+    .quiz-nav { flex-direction: column-reverse; }
+    .quiz-nav button { width: 100%; }
+    .footer { padding: 18px 16px; }
+  }
+
+  /* ================= HP KECIL (≤380px) ================= */
+
+  @media (max-width: 380px) {
+    .logo-text { font-size: 15px; }
+    .welcome h1 { font-size: 19px; }
+    .welcome-badge { font-size: 11px; padding: 6px 10px; }
+    .icon-btn { width: 36px; height: 36px; }
+    .avatar { width: 36px; height: 36px; }
+    .dropdown-panel { width: calc(100vw - 30px); right: -12px; }
+    .toast-wrap { right: 12px; bottom: 12px; left: 12px; align-items: stretch; }
+    .toast { max-width: 100%; }
+  }
+
+  /* ================= LAYAR SANGAT LEBAR (≥1600px) ================= */
+
+  @media (min-width: 1600px) {
+    .content { max-width: 1440px; }
+    .welcome h1 { font-size: 30px; }
+  }
+</style>
+</head>
+
+<body>
+
+  <!-- ================= HEADER ================= -->
+
+  <header class="header">
+
+    <div class="header-left">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Buka menu" aria-expanded="false" aria-controls="sidebar">☰</button>
+      <div class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="4" width="18" height="12" rx="2" stroke="white" stroke-width="1.8"/>
+            <path d="M8 20h8M12 16v4" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <circle class="logo-blink" cx="12" cy="10" r="2.1" fill="white"/>
+          </svg>
+        </span>
+        <span class="logo-text">tescpns<span class="logo-accent">.Online</span></span>
+      </div>
+    </div>
+
+    <div class="member-info">
+
+      <div class="dropdown-wrap">
+        <button class="icon-btn" id="notifBtn" aria-haspopup="true" aria-expanded="false" aria-label="Notifikasi">
+          🔔
+          <span class="badge-dot" id="notifDot"></span>
+        </button>
+
+        <div class="dropdown-panel" id="notifPanel" role="menu">
+          <div class="dropdown-title">Notifikasi</div>
+          <div id="notifList"></div>
+        </div>
+      </div>
+
+      <div class="dropdown-wrap">
+        <button class="member" id="memberBtn" aria-haspopup="true" aria-expanded="false">
+          <div class="avatar">👤</div>
+          <div>
+            <div class="member-name">Halo, Member</div>
+            <span class="member-status">● Member Aktif</span>
+          </div>
+        </button>
+
+        <div class="dropdown-panel" id="memberPanel" role="menu">
+          <button class="menu-item-btn" id="akunBtn">⚙️ Akun Saya</button>
+          <div class="menu-divider"></div>
+          <button class="menu-item-btn danger" id="logoutBtn">🚪 Keluar</button>
+        </div>
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <div class="layout">
+
+    <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-title">Member Area</div>
+
+      <ul class="menu" id="menuList">
+        <li><a href="#dashboard" data-target="dashboard" class="active"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
+        <li><a href="#simulasi" data-target="simulasi"><span class="menu-icon">📝</span><span class="menu-text">Simulasi CAT SKD</span></a></li>
+        <li><a href="#bumn" data-target="bumn"><span class="menu-icon">📘</span><span class="menu-text">Ebook BUMN</span></a></li>
+        <li><a href="#swasta" data-target="swasta"><span class="menu-icon">📗</span><span class="menu-text">Ebook Swasta</span></a></li>
+        <li><a href="#nganggur" data-target="nganggur"><span class="menu-icon">🚀</span><span class="menu-text">Anti Nganggur</span></a></li>
+        <li><a href="#" id="akunLink"><span class="menu-icon">⚙️</span><span class="menu-text">Akun Saya</span></a></li>
+        <li><a href="#" id="keluarLink"><span class="menu-icon">🚪</span><span class="menu-text">Keluar</span></a></li>
+      </ul>
+
+    </aside>
+
+
+    <!-- ================= CONTENT ================= -->
+
+    <main class="content">
+
+      <section class="welcome" id="dashboard">
+        <h1>Selamat Datang di Member Area! 👋</h1>
+        <p>Semua materi dan fasilitas yang menjadi hak akses member tersedia di sini.</p>
+        <span class="welcome-badge">✓ Member Aktif</span>
+      </section>
+
+      <div class="section-header">
+        <div>
+          <h2>Fasilitas Member</h2>
+          <p>Pilih materi yang ingin kamu pelajari.</p>
+        </div>
+      </div>
+
+      <section class="products">
+
+        <div class="product-card card-1" id="simulasi">
+          <div class="product-top">
+            <div class="product-icon">📝</div>
+            <div>
+              <h3>Simulasi CAT SKD Tes CPNS</h3>
+              <p>Latihan soal CAT SKD CPNS untuk membantu mempersiapkan kamu menghadapi tes CPNS. Tersedia 30 simulasi.</p>
+            </div>
+          </div>
+          <div class="product-bottom">
+            <span class="access">✓ Akses Member</span>
+            <button class="btn" data-quiz="skd">Mulai Simulasi</button>
+          </div>
+        </div>
+
+        <div class="product-card card-2" id="bumn">
+          <div class="product-top">
+            <div class="product-icon">📘</div>
+            <div>
+              <h3>Ebook Tes BUMN</h3>
+              <p>Materi dan panduan persiapan menghadapi proses seleksi dan tes masuk perusahaan BUMN.</p>
+            </div>
+          </div>
+          <div class="product-bottom">
+            <span class="access">✓ Akses Member</span>
+            <button class="btn" data-ebook="bumn">Buka Ebook</button>
+          </div>
+        </div>
+
+        <div class="product-card card-3" id="swasta">
+          <div class="product-top">
+            <div class="product-icon">📗</div>
+            <div>
+              <h3>Ebook Tes Perusahaan Swasta</h3>
+              <p>Panduan menghadapi proses rekrutmen, psikotes, interview, dan tes perusahaan swasta.</p>
+            </div>
+          </div>
+          <div class="product-bottom">
+            <span class="access">✓ Akses Member</span>
+            <button class="btn" data-ebook="swasta">Buka Ebook</button>
+          </div>
+        </div>
+
+        <div class="product-card card-4" id="nganggur">
+          <div class="product-top">
+            <div class="product-icon">🚀</div>
+            <div>
+              <h3>Ebook Jurus Anti Nganggur</h3>
+              <p>Panduan praktis mencari pekerjaan, membuat CV, menghadapi interview, dan meningkatkan peluang diterima kerja.</p>
+            </div>
+          </div>
+          <div class="product-bottom">
+            <span class="access">✓ Akses Member</span>
+            <button class="btn" data-ebook="nganggur">Buka Ebook</button>
+          </div>
+        </div>
+
+      </section>
+
+      <footer class="footer">
+        <p class="footer-notice">
+          Dilarang memfoto, merekam, menyalin, dan/atau menyebarluaskan soal maupun pembahasan ujian ini dalam bentuk apa pun kepada pihak lain. Pelanggaran atas ketentuan ini dapat dikenakan sanksi sesuai Undang-Undang Nomor 28 Tahun 2014 tentang Hak Cipta dan Undang-Undang Informasi dan Transaksi Elektronik (ITE) yang berlaku.
+        </p>
+        <p class="footer-copyright">
+          © 2026 tescpns.online — Hak Cipta Dilindungi Undang-Undang. Seluruh soal dan pembahasan adalah milik tescpns.online.
+        </p>
+      </footer>
+
+    </main>
+
+  </div>
+
+  <!-- ================= QUIZ MODAL ================= -->
+
+  <div class="modal-overlay" id="quizOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="quizTitle">Simulasi CAT SKD</h3>
+        <button class="modal-close" id="quizCloseBtn" aria-label="Tutup">✕</button>
+      </div>
+      <div class="modal-body" id="quizBody"></div>
+    </div>
+  </div>
+
+  <!-- ================= EBOOK MODAL ================= -->
+
+  <div class="modal-overlay" id="ebookOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="ebookTitle">Ebook</h3>
+        <button class="modal-close" id="ebookCloseBtn" aria-label="Tutup">✕</button>
+      </div>
+      <div class="modal-body" id="ebookBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(function () {
+
+  /* ---------- TOAST ---------- */
+  const toastWrap = document.getElementById('toastWrap');
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    toastWrap.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => t.remove(), 250);
+    }, 2600);
+  }
+
+  /* ---------- DROPDOWNS ---------- */
+  function setupDropdown(btnId, panelId) {
+    const btn = document.getElementById(btnId);
+    const panel = document.getElementById(panelId);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = panel.classList.contains('open');
+      closeAllDropdowns();
+      if (!isOpen) {
+        panel.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+    return panel;
+  }
+
+  function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-panel.open').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.icon-btn, .member').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  }
+
+  document.addEventListener('click', closeAllDropdowns);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllDropdowns(); });
+
+  setupDropdown('notifBtn', 'notifPanel');
+  setupDropdown('memberBtn', 'memberPanel');
+
+  /* ---------- NOTIFICATIONS ---------- */
+  const notifications = [
+    { title: 'Simulasi baru tersedia', body: 'Paket simulasi CAT SKD #31 baru saja ditambahkan.', read: false },
+    { title: 'Ebook BUMN diperbarui', body: 'Materi tes BUMN telah diperbarui dengan soal terbaru.', read: false },
+    { title: 'Selamat datang!', body: 'Akunmu berhasil aktif sebagai member.', read: true },
+  ];
+
+  function renderNotifications() {
+    const list = document.getElementById('notifList');
+    const dot = document.getElementById('notifDot');
+    if (notifications.length === 0) {
+      list.innerHTML = '<div class="notif-empty">Belum ada notifikasi.</div>';
+    } else {
+      list.innerHTML = notifications.map(n => `
+        <button class="notif-item">
+          <span class="notif-dot ${n.read ? 'read' : ''}"></span>
+          <span class="notif-text"><strong>${n.title}</strong><span>${n.body}</span></span>
+        </button>
+      `).join('');
+    }
+    dot.style.display = notifications.some(n => !n.read) ? 'block' : 'none';
+  }
+  renderNotifications();
+
+  document.getElementById('notifPanel').addEventListener('click', (e) => {
+    const item = e.target.closest('.notif-item');
+    if (!item) return;
+    const idx = [...document.querySelectorAll('.notif-item')].indexOf(item);
+    notifications[idx].read = true;
+    renderNotifications();
+  });
+
+  /* ---------- ACCOUNT MENU ---------- */
+  document.getElementById('akunBtn').addEventListener('click', () => {
+    closeAllDropdowns();
+    showToast('Halaman "Akun Saya" belum tersedia di demo ini.');
+  });
+  document.getElementById('akunLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast('Halaman "Akun Saya" belum tersedia di demo ini.');
+  });
+
+  function handleLogout() {
+    closeAllDropdowns();
+    if (confirm('Yakin ingin keluar dari akun?')) {
+      showToast('Kamu telah keluar. Sampai jumpa lagi!');
+    }
+  }
+  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+  document.getElementById('keluarLink').addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+
+  /* ---------- SIDEBAR NAV + MOBILE TOGGLE ---------- */
+  const sidebar = document.getElementById('sidebar');
+  const scrim = document.getElementById('sidebarScrim');
+  const hamburger = document.getElementById('hamburgerBtn');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    scrim.classList.add('show');
+    hamburger.setAttribute('aria-expanded', 'true');
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    scrim.classList.remove('show');
+    hamburger.setAttribute('aria-expanded', 'false');
+  }
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  scrim.addEventListener('click', closeSidebar);
+
+  const links = document.querySelectorAll('#menuList a[data-target]');
+  const sections = [...links].map(l => document.getElementById(l.dataset.target)).filter(Boolean);
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.getElementById(link.dataset.target);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      closeSidebar();
+    });
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = [...links].find(l => l.dataset.target === entry.target.id);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -55% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  /* ---------- EBOOK MODAL ---------- */
+  const ebookData = {
+    bumn: {
+      title: 'Ebook Tes BUMN',
+      toc: [
+        ['Bab 1', 'Gambaran umum rekrutmen BUMN'],
+        ['Bab 2', 'Tes Kemampuan Dasar (TKD)'],
+        ['Bab 3', 'Tes Wawasan Kebangsaan'],
+        ['Bab 4', 'Tips menghadapi wawancara BUMN'],
+      ]
+    },
+    swasta: {
+      title: 'Ebook Tes Perusahaan Swasta',
+      toc: [
+        ['Bab 1', 'Menyiapkan CV dan surat lamaran'],
+        ['Bab 2', 'Psikotes umum perusahaan swasta'],
+        ['Bab 3', 'Teknik menjawab interview HR & user'],
+        ['Bab 4', 'Negosiasi gaji dan penawaran kerja'],
+      ]
+    },
+    nganggur: {
+      title: 'Ebook Jurus Anti Nganggur',
+      toc: [
+        ['Bab 1', 'Menentukan arah karier'],
+        ['Bab 2', 'Membangun CV yang dilirik rekruter'],
+        ['Bab 3', 'Strategi melamar kerja secara efektif'],
+        ['Bab 4', 'Menghadapi interview dengan percaya diri'],
+      ]
+    }
+  };
+
+  const ebookOverlay = document.getElementById('ebookOverlay');
+  const ebookTitle = document.getElementById('ebookTitle');
+  const ebookBody = document.getElementById('ebookBody');
+
+  document.querySelectorAll('[data-ebook]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const data = ebookData[btn.dataset.ebook];
+      ebookTitle.textContent = data.title;
+      ebookBody.innerHTML = `
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Daftar isi materi:</p>
+        <ul class="toc-list">
+          ${data.toc.map(([bab, judul]) => `<li><span>${bab} — ${judul}</span></li>`).join('')}
+        </ul>
+        <button class="btn" style="margin-top:20px;width:100%;text-align:center;" id="ebookDownloadBtn">Unduh Ebook</button>
+      `;
+      ebookOverlay.classList.add('open');
+      document.getElementById('ebookDownloadBtn').addEventListener('click', () => {
+        ebookOverlay.classList.remove('open');
+        showToast('Unduhan dimulai (contoh demo).');
+      });
+    });
+  });
+
+  document.getElementById('ebookCloseBtn').addEventListener('click', () => ebookOverlay.classList.remove('open'));
+  ebookOverlay.addEventListener('click', (e) => { if (e.target === ebookOverlay) ebookOverlay.classList.remove('open'); });
+
+  /* ---------- QUIZ MODAL ---------- */
+  const quizQuestions = [
+    {
+      q: 'Manakah yang merupakan salah satu dari lima sila dalam Pancasila?',
+      options: ['Persatuan Indonesia', 'Kesetaraan Ekonomi', 'Kebebasan Mutlak', 'Otonomi Daerah'],
+      correct: 0
+    },
+    {
+      q: 'Jika semua A adalah B, dan semua B adalah C, maka...',
+      options: ['Semua C adalah A', 'Semua A adalah C', 'Tidak ada A yang C', 'Semua C adalah B saja'],
+      correct: 1
+    },
+    {
+      q: 'Rekan kerjamu melakukan kesalahan yang berdampak pada timmu. Sikap paling tepat adalah...',
+      options: [
+        'Menegurnya di depan tim agar jera',
+        'Mendiskusikan berdua secara baik dan mencari solusi bersama',
+        'Melaporkannya langsung ke atasan tanpa bicara dulu',
+        'Membiarkan saja karena bukan urusanmu'
+      ],
+      correct: 1
+    },
+    {
+      q: 'Antonim dari kata "sentralisasi" adalah...',
+      options: ['Desentralisasi', 'Konsolidasi', 'Integrasi', 'Unifikasi'],
+      correct: 0
+    },
+    {
+      q: 'Sebuah kereta menempuh 240 km dalam 3 jam. Berapa kecepatan rata-ratanya?',
+      options: ['60 km/jam', '70 km/jam', '80 km/jam', '90 km/jam'],
+      correct: 2
+    }
+  ];
+
+  const quizOverlay = document.getElementById('quizOverlay');
+  const quizBody = document.getElementById('quizBody');
+  const quizTitle = document.getElementById('quizTitle');
+  let qState = { i: 0, answers: [], locked: false };
+
+  function startQuiz() {
+    qState = { i: 0, answers: new Array(quizQuestions.length).fill(null), locked: false };
+    quizTitle.textContent = 'Simulasi CAT SKD';
+    renderQuestion();
+    quizOverlay.classList.add('open');
+  }
+
+  function renderQuestion() {
+    const total = quizQuestions.length;
+    const item = quizQuestions[qState.i];
+    const answered = qState.answers[qState.i];
+    const pct = Math.round(((qState.i) / total) * 100);
+    const letters = ['A', 'B', 'C', 'D'];
+
+    quizBody.innerHTML = `
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label">Soal ${qState.i + 1} dari ${total}</div>
+      <div class="quiz-question">${item.q}</div>
+      <div id="optionsWrap">
+        ${item.options.map((opt, idx) => `
+          <button class="quiz-option ${answered === idx ? 'selected' : ''}" data-idx="${idx}">
+            <span class="letter">${letters[idx]}</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="quiz-nav">
+        <button class="btn-secondary" id="prevBtn" ${qState.i === 0 ? 'disabled' : ''}>← Sebelumnya</button>
+        <button class="btn" id="nextBtn" ${answered === null ? 'disabled' : ''}>
+          ${qState.i === total - 1 ? 'Selesai' : 'Berikutnya →'}
+        </button>
+      </div>
+    `;
+
+    document.querySelectorAll('.quiz-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        qState.answers[qState.i] = parseInt(btn.dataset.idx, 10);
+        renderQuestion();
+      });
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (qState.i > 0) { qState.i--; renderQuestion(); }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (qState.i < total - 1) { qState.i++; renderQuestion(); }
+      else { renderResult(); }
+    });
+  }
+
+  function renderResult() {
+    const total = quizQuestions.length;
+    let correctCount = 0;
+    quizQuestions.forEach((item, idx) => { if (qState.answers[idx] === item.correct) correctCount++; });
+    const scorePct = Math.round((correctCount / total) * 100);
+
+    quizTitle.textContent = 'Hasil Simulasi';
+    quizBody.innerHTML = `
+      <div class="result-score">
+        <div class="num">${correctCount}/${total}</div>
+        <div class="label">Jawaban benar (${scorePct}%)</div>
+      </div>
+      <div style="margin-top:18px;">
+        ${quizQuestions.map((item, idx) => {
+          const userAns = qState.answers[idx];
+          const isCorrect = userAns === item.correct;
+          return `
+            <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+              <div style="font-size:13px;font-weight:700;margin-bottom:8px;">${idx + 1}. ${item.q}</div>
+              <div style="font-size:12.5px;color:${isCorrect ? 'var(--success)' : 'var(--danger)'};font-weight:700;">
+                ${isCorrect ? '✓ Benar' : '✕ Kurang tepat'} — jawaban tepat: ${item.options[item.correct]}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div class="quiz-nav" style="justify-content:flex-end;">
+        <button class="btn" id="retryBtn">Ulangi Simulasi</button>
+      </div>
+    `;
+    document.getElementById('retryBtn').addEventListener('click', startQuiz);
+  }
+
+  document.querySelectorAll('[data-quiz]').forEach(btn => btn.addEventListener('click', startQuiz));
+  document.getElementById('quizCloseBtn').addEventListener('click', () => quizOverlay.classList.remove('open'));
+  quizOverlay.addEventListener('click', (e) => { if (e.target === quizOverlay) quizOverlay.classList.remove('open'); });
+
+})();
+</script>
+
+</body>
+</html>
