@@ -73,34 +73,41 @@
             }
 
             if (!email) {
-                showError("Silakan masuk menggunakan link yang dikirimkan ke email Anda setelah melakukan pembayaran.");
+                showError("Silakan masukkan email atau gunakan link akses yang valid.");
                 return;
             }
 
             try {
+                // Menggunakan .maybeSingle() agar lebih aman dari error data kosong/banyak
                 const { data, error } = await supabaseClient
                     .from('pendaftar')
                     .select('*')
-                    .eq('email', email)
-                    .single();
+                    .eq('email', email.trim().toLowerCase())
+                    .maybeSingle();
 
-                if (error || !data) {
-                    showError("Data pendaftaran dengan email tersebut tidak ditemukan.");
+                if (error) {
+                    console.error("Database Error:", error);
+                    showError("Terjadi kendala pada database. Silakan coba lagi.");
                     return;
                 }
 
-                const statusPembayaran = data.status_pembayaran ? data.status_pembayaran.toLowerCase() : '';
+                if (!data) {
+                    showError("Email tidak ditemukan di data pendaftar.");
+                    return;
+                }
+
+                const statusPembayaran = data.status_pembayaran ? data.status_pembayaran.toLowerCase().trim() : '';
 
                 if (statusPembayaran === 'lunas' || statusPembayaran === 'paid') {
                     localStorage.setItem('member_email', email);
                     showMemberArea(email);
                 } else {
-                    showError("Pembayaran Anda belum terkonfirmasi lunas. Silakan selesaikan pembayaran atau hubungi admin.");
+                    showError("Pembayaran Anda belum terkonfirmasi lunas (Status saat ini: " + data.status_pembayaran + ").");
                 }
 
             } catch (err) {
                 console.error(err);
-                showError("Terjadi kesalahan koneksi sistem. Silakan coba beberapa saat lagi.");
+                showError("Terjadi kesalahan koneksi sistem.");
             }
         }
 
