@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Member Area - Tes CPNS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- 1. TAMPILAN FORM LOGIN EMAIL (MUNCUL PERTAMA JIKA BELUM ADA SESI) -->
+    <div id="loginSection" class="bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
+        <h2 class="text-2xl font-bold text-slate-800">Member Area</h2>
+        <p class="text-sm text-slate-500 mb-6">Masukkan email terdaftar Anda untuk masuk</p>
+        
+        <form id="formLogin" class="space-y-4 text-left">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Email Aktif</label>
+                <input type="email" id="loginEmail" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="nama@email.com">
+            </div>
+
+            <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200">
+                Masuk Member Area
+            </button>
+        </form>
+        <p id="errorMsg" class="text-red-500 text-sm mt-4 hidden"></p>
+    </div>
+
+    <!-- 2. TAMPILAN LOADING (SAAT OTOMATIS CEK PARAMETER URL / SESI) -->
+    <div id="loadingSection" class="hidden bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
+        <h2 class="text-xl font-bold text-slate-800">Memverifikasi Akses...</h2>
+        <p class="text-sm text-slate-500 mt-2">Mohon tunggu sebentar.</p>
+    </div>
+
+    <!-- 3. KONTEN EKSKLUSIF (TERBUKA JIKA LUNAS) -->
+    <div id="contentSection" class="hidden bg-white p-8 rounded-xl shadow-md w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Selamat Datang, <span id="namaMember" class="text-blue-600"></span>!</h1>
+                <p class="text-sm text-emerald-600 font-medium">Status: Langganan Aktif (Lunas)</p>
+            </div>
+            <button onclick="logout()" class="text-sm bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-red-200">Keluar</button>
+        </div>
+
+        <div class="space-y-4 text-slate-700">
+            <h3 class="font-bold text-lg text-slate-800">Materi Eksklusif Tes CPNS:</h3>
+            <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h4 class="font-semibold text-blue-900">Modul Tryout & Soal SKD Terbaru</h4>
+                <p class="text-sm text-blue-700 mt-1">Silakan akses tautan materi rahasia dan grup belajar Anda di bawah ini.</p>
+                <a href="#" target="_blank" class="inline-block mt-3 bg-blue-600 text-white text-sm px-4 py-2 rounded font-medium hover:bg-blue-700">Akses Materi Eksklusif</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TAMPILAN JIKA BELUM LUNAS -->
+    <div id="errorSection" class="hidden bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
+        <h2 class="text-2xl font-bold text-red-600 mb-2">Akses Ditolak!</h2>
+        <p id="errorText" class="text-sm text-slate-600 mb-6">Pembayaran Anda belum terkonfirmasi lunas.</p>
+        <button onclick="resetLogin()" class="text-sm text-blue-600 underline font-medium">Coba email lain</button>
+        <div class="mt-4">
+            <a href="https://tescpnsonline.myr.id/pl/simulasi-tes-cat-cpns" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 text-sm">Selesaikan Pembayaran</a>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://fnxkxwecgkfhdphlzfft.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_GNW-xmNgG34gpvKL03jbcQ_VOYwLDWU';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let email = urlParams.get('email');
+
+            if (email) {
+                // Jika baru saja dialihkan dari Mayar membawa email
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('loadingSection').classList.remove('hidden');
+                localStorage.setItem('member_email_secure', email);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                await prosesValidasi(email);
+            } else {
+                // Cek apakah perangkat ini sudah pernah login sebelumnya
+                email = localStorage.getItem('member_email_secure');
+                if (email) {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('loadingSection').classList.remove('hidden');
+                    await prosesValidasi(email);
+                } else {
+                    // Tampilkan form login jika tidak ada data sama sekali
+                    document.getElementById('loginSection').classList.remove('hidden');
+                }
+            }
+        });
+
+        // Event saat user mengetik email dan menekan tombol "Masuk Member Area"
+        document.getElementById('formLogin').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('loginEmail').value.trim();
+            const btn = document.getElementById('btnLogin');
+            const errorMsg = document.getElementById('errorMsg');
+
+            btn.disabled = true;
+            btn.textContent = 'Memeriksa...';
+            errorMsg.classList.add('hidden');
+
+            const status = await prosesValidasi(emailInput);
+            
+            if (status !== 'lunas') {
+                btn.disabled = false;
+                btn.textContent = 'Masuk Member Area';
+            }
+        });
+
+        async function prosesValidasi(email) {
+            const { data, error } = await supabaseClient
+                .from('pendaftar')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            document.getElementById('loadingSection').classList.add('hidden');
+
+            if (error || !data) {
+                tampilErrorLogin('Email tidak terdaftar. Pastikan Anda mendaftar dengan email yang benar.');
+                return 'tidak_terdaftar';
+            } else if (data.status_pembayaran !== 'lunas') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('errorText').textContent = `Email terdaftar, tetapi status pembayaran masih: ${data.status_pembayaran.toUpperCase()}. Selesaikan pembayaran terlebih dahulu.`;
+                document.getElementById('errorSection').classList.remove('hidden');
+                return 'belum_lunas';
+            } else {
+                // Berhasil & Lunas!
+                localStorage.setItem('member_email_secure', data.email);
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('namaMember').textContent = data.nama;
+                document.getElementById('contentSection').classList.remove('hidden');
+                return 'lunas';
+            }
+        }
+
+        function tampilErrorLogin(pesan) {
+            document.getElementById('loginSection').classList.remove('hidden');
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = pesan;
+            errorMsg.classList.remove('hidden');
+        }
+
+        function resetLogin() {
+            localStorage.removeItem('member_email_secure');
+            document.getElementById('errorSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('loginEmail').value = '';
+        }
+
+        function logout() {
+            localStorage.removeItem('member_email_secure');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
