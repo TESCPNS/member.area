@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Member Area</title>
-    <!-- Tailwind CSS untuk styling cepat -->
+    <!-- Tailwind CSS untuk styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -59,29 +59,25 @@
 
     <!-- Script Logika Validasi -->
     <script>
-        // Konfigurasi Supabase Anda
-        const SUPABASE_URL = 'GANTI_DENGAN_URL_SUPABASE_ANDA';
-        const SUPABASE_ANON_KEY = 'GANTI_DENGAN_ANON_KEY_SUPABASE_ANDA';
+        const SUPABASE_URL = 'https://fnxkxwecgkfhdphlzfft.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZueGt4d2VjZ2tmaGRwaGx6ZmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MzQ2NTUsImV4cCI6MjEwMDUxMDY1NX0.r7p2YF4RVEZQQGDAQqvL4Am9n8vpQbuIQQjYLeH1upw';
+        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function init() {
-            // Ambil parameter email dari URL (Contoh: ?email=user@email.com)
             const urlParams = new URLSearchParams(window.location.search);
             let email = urlParams.get('email');
 
-            // Jika tidak ada di URL, cek apakah tersimpan di localStorage browser
             if (!email) {
                 email = localStorage.getItem('member_email');
             }
 
-            // Jika sama sekali tidak ada email, tampilkan error minta input/akses benar
             if (!email) {
                 showError("Silakan masuk menggunakan link yang dikirimkan ke email Anda setelah melakukan pembayaran.");
                 return;
             }
 
             try {
-                // Query ke tabel 'pendaftar' di Supabase berdasarkan email[cite: 1]
                 const { data, error } = await supabaseClient
                     .from('pendaftar')
                     .select('*')
@@ -93,11 +89,9 @@
                     return;
                 }
 
-                // Cek apakah status pembayaran sudah lunas (bisa disesuaikan dengan isi database Anda misal 'lunas' / 'paid')
                 const statusPembayaran = data.status_pembayaran ? data.status_pembayaran.toLowerCase() : '';
 
                 if (statusPembayaran === 'lunas' || statusPembayaran === 'paid') {
-                    // Simpan sesi ke localStorage agar tidak perlu বারবার cek URL
                     localStorage.setItem('member_email', email);
                     showMemberArea(email);
                 } else {
@@ -126,10 +120,9 @@
 
         function logout() {
             localStorage.removeItem('member_email');
-            window.location.href = window.location.pathname; // Reset halaman
+            window.location.href = window.location.pathname;
         }
 
-        // Jalankan fungsi saat halaman dimuat
         window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
