@@ -3,160 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Member Area - Tes CPNS</title>
+    <title>Portal Member Area</title>
+    <!-- Tailwind CSS untuk styling cepat -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 font-sans antialiased text-slate-800">
 
-    <!-- 1. TAMPILAN FORM LOGIN EMAIL (MUNCUL PERTAMA JIKA BELUM ADA SESI) -->
-    <div id="loginSection" class="bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
-        <h2 class="text-2xl font-bold text-slate-800">Member Area</h2>
-        <p class="text-sm text-slate-500 mb-6">Masukkan email terdaftar Anda untuk masuk</p>
+    <!-- Container Utama -->
+    <div id="app" class="min-h-screen flex items-center justify-center p-4">
         
-        <form id="formLogin" class="space-y-4 text-left">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Email Aktif</label>
-                <input type="email" id="loginEmail" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="nama@email.com">
-            </div>
-
-            <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200">
-                Masuk Member Area
-            </button>
-        </form>
-        <p id="errorMsg" class="text-red-500 text-sm mt-4 hidden"></p>
-    </div>
-
-    <!-- 2. TAMPILAN LOADING (SAAT OTOMATIS CEK PARAMETER URL / SESI) -->
-    <div id="loadingSection" class="hidden bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
-        <h2 class="text-xl font-bold text-slate-800">Memverifikasi Akses...</h2>
-        <p class="text-sm text-slate-500 mt-2">Mohon tunggu sebentar.</p>
-    </div>
-
-    <!-- 3. KONTEN EKSKLUSIF (TERBUKA JIKA LUNAS) -->
-    <div id="contentSection" class="hidden bg-white p-8 rounded-xl shadow-md w-full max-w-2xl">
-        <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800">Selamat Datang, <span id="namaMember" class="text-blue-600"></span>!</h1>
-                <p class="text-sm text-emerald-600 font-medium">Status: Langganan Aktif (Lunas)</p>
-            </div>
-            <button onclick="logout()" class="text-sm bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-red-200">Keluar</button>
+        <!-- 1. State Loading -->
+        <div id="loading-state" class="text-center">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
+            <p class="mt-4 text-slate-600 font-medium">Memeriksa status akses Anda...</p>
         </div>
 
-        <div class="space-y-4 text-slate-700">
-            <h3 class="font-bold text-lg text-slate-800">Materi Eksklusif Tes CPNS:</h3>
-            <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <h4 class="font-semibold text-blue-900">Modul Tryout & Soal SKD Terbaru</h4>
-                <p class="text-sm text-blue-700 mt-1">Silakan akses tautan materi rahasia dan grup belajar Anda di bawah ini.</p>
-                <a href="#" target="_blank" class="inline-block mt-3 bg-blue-600 text-white text-sm px-4 py-2 rounded font-medium hover:bg-blue-700">Akses Materi Eksklusif</a>
+        <!-- 2. State Error / Belum Lunas -->
+        <div id="error-state" class="hidden max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-rose-100 text-rose-500 rounded-full mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Akses Belum Aktif</h2>
+            <p id="error-message" class="text-slate-600 text-sm mb-6">Pembayaran Anda belum terkonfirmasi lunas atau email tidak ditemukan di sistem kami.</p>
+            <a href="https://wa.me/628xxxxxxxxxx" class="inline-block w-full bg-indigo-600 text-white font-medium py-3 px-4 rounded-xl hover:bg-indigo-700 transition">Hubungi Bantuan Admin</a>
+        </div>
+
+        <!-- 3. State Member Area (Tampil Jika Lunas) -->
+        <div id="member-area" class="hidden max-w-4xl w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+            <div class="flex justify-between items-center border-b pb-6 mb-6">
+                <div>
+                    <span class="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Status: Lunas</span>
+                    <h1 class="text-2xl font-bold text-slate-900 mt-2">Selamat Datang di Member Area!</h1>
+                    <p id="user-email-display" class="text-sm text-slate-500"></p>
+                </div>
+                <button onclick="logout()" class="text-sm text-rose-600 hover:text-rose-700 font-medium">Keluar</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+                    <h3 class="font-bold text-indigo-900 mb-2">Modul Pembelajaran</h3>
+                    <p class="text-sm text-indigo-700 mb-4">Akses semua materi eksklusif yang sudah disiapkan untuk Anda.</p>
+                    <button class="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Mulai Belajar</button>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-slate-900 mb-2">Grup Komunitas</h3>
+                    <p class="text-sm text-slate-600 mb-4">Bergabung dengan member lainnya di grup eksklusif.</p>
+                    <button class="bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-900 transition">Gabung Grup</button>
+                </div>
             </div>
         </div>
+
     </div>
 
-    <!-- 4. TAMPILAN JIKA BELUM LUNAS -->
-    <div id="errorSection" class="hidden bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
-        <h2 class="text-2xl font-bold text-red-600 mb-2">Akses Ditolak!</h2>
-        <p id="errorText" class="text-sm text-slate-600 mb-6">Pembayaran Anda belum terkonfirmasi lunas.</p>
-        <button onclick="resetLogin()" class="text-sm text-blue-600 underline font-medium">Coba email lain</button>
-        <div class="mt-4">
-            <a href="https://tescpnsonline.myr.id/pl/simulasi-tes-cat-cpns" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 text-sm">Selesaikan Pembayaran</a>
-        </div>
-    </div>
-
+    <!-- Script Logika Validasi -->
     <script>
-        const SUPABASE_URL = 'https://fnxkxwecgkfhdphlzfft.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_GNW-xmNgG34gpvKL03jbcQ_VOYwLDWU';
+        // Konfigurasi Supabase Anda
+        const SUPABASE_URL = 'GANTI_DENGAN_URL_SUPABASE_ANDA';
+        const SUPABASE_ANON_KEY = 'GANTI_DENGAN_ANON_KEY_SUPABASE_ANDA';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        async function init() {
+            // Ambil parameter email dari URL (Contoh: ?email=user@email.com)
             const urlParams = new URLSearchParams(window.location.search);
             let email = urlParams.get('email');
 
-            if (email) {
-                // Jika baru saja dialihkan dari Mayar membawa email
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('loadingSection').classList.remove('hidden');
-                localStorage.setItem('member_email_secure', email);
-                window.history.replaceState({}, document.title, window.location.pathname);
-                await prosesValidasi(email);
-            } else {
-                // Cek apakah perangkat ini sudah pernah login sebelumnya
-                email = localStorage.getItem('member_email_secure');
-                if (email) {
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('loadingSection').classList.remove('hidden');
-                    await prosesValidasi(email);
-                } else {
-                    // Tampilkan form login jika tidak ada data sama sekali
-                    document.getElementById('loginSection').classList.remove('hidden');
+            // Jika tidak ada di URL, cek apakah tersimpan di localStorage browser
+            if (!email) {
+                email = localStorage.getItem('member_email');
+            }
+
+            // Jika sama sekali tidak ada email, tampilkan error minta input/akses benar
+            if (!email) {
+                showError("Silakan masuk menggunakan link yang dikirimkan ke email Anda setelah melakukan pembayaran.");
+                return;
+            }
+
+            try {
+                // Query ke tabel 'pendaftar' di Supabase berdasarkan email[cite: 1]
+                const { data, error } = await supabaseClient
+                    .from('pendaftar')
+                    .select('*')
+                    .eq('email', email)
+                    .single();
+
+                if (error || !data) {
+                    showError("Data pendaftaran dengan email tersebut tidak ditemukan.");
+                    return;
                 }
-            }
-        });
 
-        // Event saat user mengetik email dan menekan tombol "Masuk Member Area"
-        document.getElementById('formLogin').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const emailInput = document.getElementById('loginEmail').value.trim();
-            const btn = document.getElementById('btnLogin');
-            const errorMsg = document.getElementById('errorMsg');
+                // Cek apakah status pembayaran sudah lunas (bisa disesuaikan dengan isi database Anda misal 'lunas' / 'paid')
+                const statusPembayaran = data.status_pembayaran ? data.status_pembayaran.toLowerCase() : '';
 
-            btn.disabled = true;
-            btn.textContent = 'Memeriksa...';
-            errorMsg.classList.add('hidden');
+                if (statusPembayaran === 'lunas' || statusPembayaran === 'paid') {
+                    // Simpan sesi ke localStorage agar tidak perlu বারবার cek URL
+                    localStorage.setItem('member_email', email);
+                    showMemberArea(email);
+                } else {
+                    showError("Pembayaran Anda belum terkonfirmasi lunas. Silakan selesaikan pembayaran atau hubungi admin.");
+                }
 
-            const status = await prosesValidasi(emailInput);
-            
-            if (status !== 'lunas') {
-                btn.disabled = false;
-                btn.textContent = 'Masuk Member Area';
-            }
-        });
-
-        async function prosesValidasi(email) {
-            const { data, error } = await supabaseClient
-                .from('pendaftar')
-                .select('*')
-                .eq('email', email)
-                .single();
-
-            document.getElementById('loadingSection').classList.add('hidden');
-
-            if (error || !data) {
-                tampilErrorLogin('Email tidak terdaftar. Pastikan Anda mendaftar dengan email yang benar.');
-                return 'tidak_terdaftar';
-            } else if (data.status_pembayaran !== 'lunas') {
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('errorText').textContent = `Email terdaftar, tetapi status pembayaran masih: ${data.status_pembayaran.toUpperCase()}. Selesaikan pembayaran terlebih dahulu.`;
-                document.getElementById('errorSection').classList.remove('hidden');
-                return 'belum_lunas';
-            } else {
-                // Berhasil & Lunas!
-                localStorage.setItem('member_email_secure', data.email);
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('namaMember').textContent = data.nama;
-                document.getElementById('contentSection').classList.remove('hidden');
-                return 'lunas';
+            } catch (err) {
+                console.error(err);
+                showError("Terjadi kesalahan koneksi sistem. Silakan coba beberapa saat lagi.");
             }
         }
 
-        function tampilErrorLogin(pesan) {
-            document.getElementById('loginSection').classList.remove('hidden');
-            const errorMsg = document.getElementById('errorMsg');
-            errorMsg.textContent = pesan;
-            errorMsg.classList.remove('hidden');
+        function showMemberArea(email) {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('member-area').classList.remove('hidden');
+            document.getElementById('user-email-display').textContent = email;
         }
 
-        function resetLogin() {
-            localStorage.removeItem('member_email_secure');
-            document.getElementById('errorSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('loginEmail').value = '';
+        function showError(message) {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('member-area').classList.add('hidden');
+            document.getElementById('error-state').classList.remove('hidden');
+            document.getElementById('error-message').textContent = message;
         }
 
         function logout() {
-            localStorage.removeItem('member_email_secure');
-            location.reload();
+            localStorage.removeItem('member_email');
+            window.location.href = window.location.pathname; // Reset halaman
         }
+
+        // Jalankan fungsi saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
